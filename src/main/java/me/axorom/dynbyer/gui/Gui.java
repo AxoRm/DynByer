@@ -1,6 +1,8 @@
 package me.axorom.dynbyer.gui;
 
 import me.axorom.dynbyer.DynByer;
+import me.axorom.dynbyer.utils.Database;
+import me.axorom.dynbyer.utils.DatabaseItem;
 import me.axorom.dynbyer.utils.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -17,10 +19,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import me.axorom.dynbyer.utils.Config;
 
@@ -59,12 +58,22 @@ public class Gui implements Listener {
 
     @EventHandler
     public void onInventoryClick(final InventoryClickEvent e) {
-        if (!e.getInventory().equals(inventory)) return;
+        if (!Objects.equals(e.getClickedInventory(), inventory)) return;
         e.setCancelled(true);
         final ItemStack clickedItem = e.getCurrentItem();
         if (clickedItem == null || clickedItem.getType().isAir()) return;
         final Player p = (Player) e.getWhoClicked();
         p.sendMessage("You clicked at slot " + e.getRawSlot());
+
+        Item item = DynByer.items.stream().filter(aitem -> aitem.getSlot() == e.getSlot()).findFirst().get();
+
+
+
+        Map<String, DatabaseItem> databaseItems = Database.databaseItems.getOrDefault(p.getName(), new HashMap<>());
+        DatabaseItem databaseItem = databaseItems.getOrDefault(item.getId(), new DatabaseItem(0, item.getId()));
+        databaseItem.addSelled(1);
+        databaseItems.put(item.getId(), databaseItem);
+        Database.databaseItems.put(p.getName(), databaseItems);
     }
 
     @EventHandler

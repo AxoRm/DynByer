@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class Database {
     YamlConfiguration db;
-    public Map<String, List<DatabaseItem>> databaseItems;
+    public static Map<String, Map<String, DatabaseItem>> databaseItems;
     DynByer plugin = DynByer.instance;
 
     public Database() {
@@ -30,9 +30,9 @@ public class Database {
         databaseItems = new HashMap<>();
         db.getKeys(false).forEach(player -> {
             ConfigurationSection section = db.getConfigurationSection(player);
-            List<DatabaseItem> list = new ArrayList<>();
+            Map<String, DatabaseItem> list = new HashMap<>();
             section.getKeys(false).forEach(item -> {
-                list.add(new DatabaseItem(section.getInt(item), item));
+                list.put(item, new DatabaseItem(section.getInt(item), item));
             });
             databaseItems.put(player, list);
         });
@@ -40,8 +40,8 @@ public class Database {
 
     public void save() {
         databaseItems.forEach((k, vList) -> {
-            vList.forEach(v -> {
-                db.set(k+"."+v.material+".selled", v.getSelled());
+            vList.forEach((ignored, v) -> {
+                db.set(k+"."+v.getMaterial()+".selled", v.getSelled());
             });
         });
 

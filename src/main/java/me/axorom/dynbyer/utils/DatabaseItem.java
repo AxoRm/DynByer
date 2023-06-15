@@ -11,6 +11,10 @@ public class DatabaseItem {
 
     String material;
 
+    public void addSelled(int a) {
+        this.selled += a;
+    }
+
     public DatabaseItem(int selled, String material) {
         this.selled = selled;
         this.material = material;
