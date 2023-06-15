@@ -27,14 +27,14 @@ import me.axorom.dynbyer.utils.Config;
 public class Gui implements Listener {
     private final Inventory inventory;
 
-    public Gui(int size, String title, ArrayList<Item> items, Map<String, Double> coefficients) {
+    public Gui(int size, String title, ArrayList<Item> items, Map<String, Integer> coefficients) {
         inventory = Bukkit.createInventory(null, size * 9, title);
         initializeItems(items, coefficients);
     }
 
-    public void initializeItems(ArrayList<Item> items, Map<String, Double> coefficients) {
+    public void initializeItems(ArrayList<Item> items, Map<String, Integer> coefficients) {
         for (Item item : items) {
-            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), coefficients.getOrDefault(item.getId(), item.getCoefficient())));
+            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), Math.pow(item.getCoefficient(), Math.floor((double) coefficients.getOrDefault(item.getId(), 0) /item.getPeriod()))));
         }
     }
 

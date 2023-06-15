@@ -32,9 +32,9 @@ public class SellerCommand extends AbstractCommand{
         }
         if (args[0].equalsIgnoreCase("menu")) {
             List<DatabaseItem> databaseItem = DynByer.database.databaseItems.getOrDefault(sender.getName(), new ArrayList<>());
-            Map<String, Double> coefficients = new HashMap<>();
+            Map<String, Integer> coefficients = new HashMap<>();
             for (DatabaseItem item : databaseItem) {
-                coefficients.put(item.getMaterial(), item.getCoefficient());
+                coefficients.put(item.getMaterial(), item.getSelled());
             }
             Gui gui = new Gui(Config.getRows(),Config.getTitle(), DynByer.items, coefficients);
             DynByer.gui.displayInventory((Player) sender);

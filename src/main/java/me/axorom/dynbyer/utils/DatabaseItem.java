@@ -1,26 +1,18 @@
 package me.axorom.dynbyer.utils;
 
 public class DatabaseItem {
-    double coefficient;
-    int blockLeft;
-
-    public double getCoefficient() {
-        return coefficient;
-    }
-
-    public int getBlockLeft() {
-        return blockLeft;
-    }
-
+    int selled; //
     public String getMaterial() {
         return material;
+    }
+    public int getSelled() {
+        return selled;
     }
 
     String material;
 
-    public DatabaseItem(double coefficient, int blockLeft, String material) {
-        this.coefficient = coefficient;
-        this.blockLeft = blockLeft;
+    public DatabaseItem(int selled, String material) {
+        this.selled = selled;
         this.material = material;
     }
 }

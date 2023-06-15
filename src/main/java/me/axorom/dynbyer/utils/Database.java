@@ -32,7 +32,7 @@ public class Database {
             ConfigurationSection section = db.getConfigurationSection(player);
             List<DatabaseItem> list = new ArrayList<>();
             section.getKeys(false).forEach(item -> {
-                list.add(new DatabaseItem(section.getDouble(item+".coefficient"), section.getInt(item+".blockLeft"), item));
+                list.add(new DatabaseItem(section.getInt(item), item));
             });
             databaseItems.put(player, list);
         });
@@ -41,8 +41,7 @@ public class Database {
     public void save() {
         databaseItems.forEach((k, vList) -> {
             vList.forEach(v -> {
-                db.set(k+"."+v.material+".coefficient", v.coefficient);
-                db.set(k+"."+v.material+".blockLeft", v.blockLeft);
+                db.set(k+"."+v.material+".selled", v.getSelled());
             });
         });
 
