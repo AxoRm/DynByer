@@ -1,7 +1,7 @@
 rows: 3
 empty: light_gray_stained_glass_pain
 title: 'Скупщик'
-lore: 'Цена предмета: '
+lore: 'Цена предмета: {0}'
 sell:
   items:
     item0:

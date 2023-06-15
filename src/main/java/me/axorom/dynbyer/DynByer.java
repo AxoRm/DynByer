@@ -1,6 +1,7 @@
 package me.axorom.dynbyer;
 
 import me.axorom.dynbyer.commands.SellerCommand;
+import me.axorom.dynbyer.economy.EconomyUtils;
 import me.axorom.dynbyer.utils.Config;
 import me.axorom.dynbyer.utils.Database;
 import me.axorom.dynbyer.utils.Item;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 public final class DynByer extends JavaPlugin {
     public static Database database;
     public static DynByer instance;
+    public static EconomyUtils economyUtils;
     public static ArrayList<Item> items;
     @Override
     public void onEnable() {
@@ -19,6 +21,7 @@ public final class DynByer extends JavaPlugin {
         items = Config.getItems();
         new SellerCommand();
         database = new Database();
+        economyUtils = new EconomyUtils();
         Bukkit.getLogger().info("DynBuyer is enabled");
     }
 
