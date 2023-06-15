@@ -2,11 +2,10 @@ package me.axorom.dynbyer.gui;
 
 import me.axorom.dynbyer.DynByer;
 import me.axorom.dynbyer.utils.Item;
-import net.minecraft.server.v1_16_R2.NBTTagCompound;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R2.inventory.CraftItemStack;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,24 +14,27 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
-import static me.axorom.dynbyer.utils.Config.lore;
+import me.axorom.dynbyer.utils.Config;
 
 public class Gui implements Listener {
     private final Inventory inventory;
 
-    public Gui(int size, String title, ArrayList<Item> items, double coefficient) {
+    public Gui(int size, String title, ArrayList<Item> items, Map<String, Double> coefficients) {
         inventory = Bukkit.createInventory(null, size * 9, title);
-        initializeItems(items, coefficient);
+        initializeItems(items, coefficients);
     }
 
-    public void initializeItems(ArrayList<Item> items, double coefficient) {
+    public void initializeItems(ArrayList<Item> items, Map<String, Double> coefficients) {
         for (Item item : items) {
-            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), coefficient));
+            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), coefficients.getOrDefault(item.getId(), item.getCoefficient())));
         }
     }
 
@@ -44,11 +46,9 @@ public class Gui implements Listener {
         }
         final ItemStack item = new ItemStack(Objects.requireNonNull(Material.matchMaterial(materialText)), 1);
         final ItemMeta meta = item.getItemMeta();
-        net.minecraft.server.v1_16_R2.ItemStack stack = CraftItemStack.asNMSCopy(item);
-        NBTTagCompound cost = new NBTTagCompound();
-        cost.setDouble("cost", coefficient*price);
-        assert meta != null;
-        meta.setLore(Arrays.asList(lore + price));
+        PersistentDataContainer container =  meta.getPersistentDataContainer();
+        container.set(new NamespacedKey(DynByer.instance, "price"), PersistentDataType.DOUBLE, coefficient*price);
+        meta.setLore(Arrays.asList(Config.format(Config.lore, String.valueOf(coefficient*price))));
         item.setItemMeta(meta);
         return item;
     }
@@ -59,12 +59,10 @@ public class Gui implements Listener {
 
     @EventHandler
     public void onInventoryClick(final InventoryClickEvent e) {
-        if (!e.getInventory().equals(inventory))
-            return;
+        if (!e.getInventory().equals(inventory)) return;
         e.setCancelled(true);
         final ItemStack clickedItem = e.getCurrentItem();
-        if (clickedItem == null || clickedItem.getType().isAir())
-            return;
+        if (clickedItem == null || clickedItem.getType().isAir()) return;
         final Player p = (Player) e.getWhoClicked();
         p.sendMessage("You clicked at slot " + e.getRawSlot());
     }

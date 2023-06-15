@@ -1,6 +1,7 @@
 package me.axorom.dynbyer.utils;
 
 import me.axorom.dynbyer.DynByer;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -28,5 +29,12 @@ public class Config {
 
     public static String getTitle(){
         return config.getString("title");
+    }
+
+    public static String format(String join, String ... s) {
+        for (int i = 0; i < s.length; i++) {
+            join = join.replaceAll("\\{"+i+"}", s[i]);
+        }
+        return ChatColor.translateAlternateColorCodes('&', join);
     }
 }

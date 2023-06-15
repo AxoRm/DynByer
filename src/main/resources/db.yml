@@ -1,0 +1,4 @@
+player:
+  item:
+    coeficient: 0.1
+    blockLeft: 10

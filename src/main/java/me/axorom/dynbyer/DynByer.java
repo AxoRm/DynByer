@@ -19,7 +19,6 @@ public final class DynByer extends JavaPlugin {
     public void onEnable() {
         instance = this;
         items = Config.getItems();
-        gui = new Gui(Config.getRows(),Config.getTitle(), items, DynByer.database.getCoefficient(sender.getName()));
         new SellerCommand();
         database = new Database();
         Bukkit.getLogger().info("DynBuyer is enabled");
@@ -27,6 +26,7 @@ public final class DynByer extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        database.save();
         Bukkit.getLogger().info("DynBuyer is disabled");
     }
 }

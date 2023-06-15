@@ -1,32 +1,56 @@
 package me.axorom.dynbyer.utils;
 
+import me.axorom.dynbyer.DynByer;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-@SerializableAs("PlayerData")
-public class Database implements ConfigurationSerializable {
-    public static String playerName;
-    public static HashMap<String, Integer> blockCounts;
+public class Database {
+    YamlConfiguration db;
+    public Map<String, List<DatabaseItem>> databaseItems;
+    DynByer plugin = DynByer.instance;
 
-    public Database(String playerName, HashMap<String, Integer> blockCounts) {
-        this.playerName = playerName;
-        this.blockCounts = blockCounts;
+    public Database() {
+        reloadBase();
     }
 
-    public static Database valueOf(Map<String, Object> serialized) {
-        String playerName = (String) serialized.get("playerName");
-        HashMap<String, Integer> blockCounts = (HashMap<String, Integer>) serialized.get("blockCounts");
-        return new Database(playerName, blockCounts);
+    public void reloadBase() {
+        File configFile = new File(plugin.getDataFolder(), "db.yml");
+        if (!configFile.exists()) plugin.saveResource("db.yml", false);
+        db = YamlConfiguration.loadConfiguration(configFile);
+        databaseItems = new HashMap<>();
+        db.getKeys(false).forEach(player -> {
+            ConfigurationSection section = db.getConfigurationSection(player);
+            List<DatabaseItem> list = new ArrayList<>();
+            section.getKeys(false).forEach(item -> {
+                list.add(new DatabaseItem(section.getDouble(item+".coefficient"), section.getInt(item+".blockLeft"), item));
+            });
+            databaseItems.put(player, list);
+        });
     }
 
-    @Override
-    public Map<String, Object> serialize() {
-        Map<String, Object> serialized = new HashMap<>();
-        serialized.put("playerName", playerName);
-        serialized.put("blockCounts", blockCounts);
-        return serialized;
+    public void save() {
+        databaseItems.forEach((k, vList) -> {
+            vList.forEach(v -> {
+                db.set(k+"."+v.material+".coefficient", v.coefficient);
+                db.set(k+"."+v.material+".blockLeft", v.blockLeft);
+            });
+        });
+
+        try {
+            db.save(new File(plugin.getDataFolder(), "db.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            Bukkit.getLogger().warning("Failed to save config file: " + e.getMessage());
+        }
     }
 }
