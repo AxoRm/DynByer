@@ -41,7 +41,7 @@ public class Database {
     public void save() {
         databaseItems.forEach((k, vList) -> {
             vList.forEach((ignored, v) -> {
-                db.set(k+"."+v.getMaterial()+".selled", v.getSelled());
+                db.set(k+"."+v.getMaterial(), v.getSelled());
             });
         });
 

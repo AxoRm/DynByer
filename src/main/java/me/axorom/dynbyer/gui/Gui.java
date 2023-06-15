@@ -25,15 +25,24 @@ import me.axorom.dynbyer.utils.Config;
 
 public class Gui implements Listener {
     private final Inventory inventory;
-
-    public Gui(int size, String title, ArrayList<Item> items, Map<String, Integer> coefficients) {
+    ArrayList<Item> items;
+    public Gui(int size, String title, ArrayList<Item> items, Player player) {
         inventory = Bukkit.createInventory(null, size * 9, title);
-        initializeItems(items, coefficients);
+        this.items = items;
+        initializeItems(getCoeficient(player));
+        Bukkit.getPluginManager().registerEvents(this, DynByer.instance);
     }
 
-    public void initializeItems(ArrayList<Item> items, Map<String, Integer> coefficients) {
+    public Map<String, Integer> getCoeficient(Player player) {
+        Map<String, DatabaseItem> databaseItem = Database.databaseItems.getOrDefault(player.getName(), new HashMap<>());
+        Map<String, Integer> coefficients = new HashMap<>();
+        databaseItem.forEach((k, item) -> coefficients.put(item.getMaterial(), item.getSelled()));
+        return coefficients;
+    }
+
+    public void initializeItems(Map<String, Integer> coefficients) {
         for (Item item : items) {
-            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), Math.pow(item.getCoefficient(), Math.floor((double) coefficients.getOrDefault(item.getId(), 0) /item.getPeriod()))));
+            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), Math.pow(item.getCoefficient(), Math.floor((double) coefficients.getOrDefault(item.getId()+"_"+String.valueOf(item.getSlot()), 0) /item.getPeriod()))));
         }
     }
 
@@ -46,6 +55,7 @@ public class Gui implements Listener {
         final ItemStack item = new ItemStack(Objects.requireNonNull(Material.matchMaterial(materialText)), 1);
         final ItemMeta meta = item.getItemMeta();
         PersistentDataContainer container =  meta.getPersistentDataContainer();
+        System.out.println(coefficient);
         container.set(new NamespacedKey(DynByer.instance, "price"), PersistentDataType.DOUBLE, coefficient*price);
         meta.setLore(Arrays.asList(Config.format(Config.lore, String.valueOf(coefficient*price))));
         item.setItemMeta(meta);
@@ -68,12 +78,12 @@ public class Gui implements Listener {
         Item item = DynByer.items.stream().filter(aitem -> aitem.getSlot() == e.getSlot()).findFirst().get();
 
 
-
         Map<String, DatabaseItem> databaseItems = Database.databaseItems.getOrDefault(p.getName(), new HashMap<>());
-        DatabaseItem databaseItem = databaseItems.getOrDefault(item.getId(), new DatabaseItem(0, item.getId()));
+        DatabaseItem databaseItem = databaseItems.getOrDefault(item.getId()+"_"+String.valueOf(e.getSlot()), new DatabaseItem(0, item.getId()+"_"+String.valueOf(e.getSlot())));
         databaseItem.addSelled(1);
-        databaseItems.put(item.getId(), databaseItem);
+        databaseItems.put(item.getId()+"_"+String.valueOf(e.getSlot()), databaseItem);
         Database.databaseItems.put(p.getName(), databaseItems);
+        initializeItems(getCoeficient(p));
     }
 
     @EventHandler
