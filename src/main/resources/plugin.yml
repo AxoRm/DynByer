@@ -1,0 +1,7 @@
+name: DynByer
+version: '${project.version}'
+main: me.axorom.dynbyer.DynByer
+api-version: 1.16
+commands:
+  seller:
+    permission: seller.use

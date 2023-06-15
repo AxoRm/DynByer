@@ -1,0 +1,30 @@
+rows: 3
+empty: light_gray_stained_glass_pain
+title: 'Скупщик'
+lore: 'Цена предмета: '
+sell:
+  items:
+    item0:
+      id: cobblestone
+      startprice: 100
+      coefficient: 0.1
+      period: 5
+      slot: 0
+    item1:
+      id: cobblestone
+      startprice: 100
+      coefficient: 0.1
+      period: 20
+      slot: 0
+    item2:
+      id: cobblestone
+      startprice: 100
+      coefficient: 0.1
+      period: 10
+      slot: 0
+    item3:
+      id: cobblestone
+      startprice: 100
+      coefficient: 0.1
+      period: 15
+      slot: 0
