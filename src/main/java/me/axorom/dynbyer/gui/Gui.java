@@ -34,20 +34,20 @@ public class Gui implements Listener {
         Bukkit.getPluginManager().registerEvents(this, DynByer.instance);
     }
 
-    public Map<String, Integer> getCoeficients(Player player) {
+    public Map<String, Integer> getCoefficients(Player player) {
         Map<String, DatabaseItem> databaseItem = Database.databaseItems.getOrDefault(player.getName(), new HashMap<>());
         Map<String, Integer> coefficients = new HashMap<>();
         databaseItem.forEach((k, item) -> coefficients.put(item.getMaterial(), item.getSelled()));
         return coefficients;
     }
 
-    public double getCoeficient(Player player, Item item) {
-        return Math.pow(item.getCoefficient(), Math.floor((double) getCoeficients(player).getOrDefault(item.getId()+"_"+String.valueOf(item.getSlot()), 0) /item.getPeriod()));
+    public double getCoefficient(Player player, Item item) {
+        return Math.pow(item.getCoefficient(), Math.floor((double) getCoefficients(player).getOrDefault(item.getId() + "_" + item.getSlot(), 0) / item.getPeriod()));
     }
 
     public void initializeItems(Player player) {
         for (Item item : items) {
-            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(),getCoeficient(player, item)));
+            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), getCoefficient(player, item)));
         }
     }
 
@@ -59,6 +59,7 @@ public class Gui implements Listener {
         }
         final ItemStack item = new ItemStack(Objects.requireNonNull(Material.matchMaterial(materialText)), 1);
         final ItemMeta meta = item.getItemMeta();
+        assert meta != null;
         PersistentDataContainer container =  meta.getPersistentDataContainer();
         container.set(new NamespacedKey(DynByer.instance, "price"), PersistentDataType.DOUBLE, coefficient*price);
         meta.setLore(Arrays.asList(Config.format(Config.lore, String.valueOf(coefficient*price))));
@@ -79,12 +80,23 @@ public class Gui implements Listener {
         final ItemStack clickedItem = e.getCurrentItem();
         if (clickedItem == null || clickedItem.getType().isAir()) return;
         final Player player = (Player) e.getWhoClicked();
-        Item item = DynByer.items.stream().filter(aitem -> aitem.getSlot() == e.getSlot()).findFirst().get();
+        Item item = DynByer.items.stream().filter(aitem -> aitem.getSlot() == e.getSlot()).findFirst().orElse(new Item("cobblestone",0,0,0,0));
         Map<String, DatabaseItem> databaseItems = Database.databaseItems.getOrDefault(player.getName(), new HashMap<>());
-        DatabaseItem databaseItem = databaseItems.getOrDefault(item.getId()+"_"+String.valueOf(e.getSlot()), new DatabaseItem(0, item.getId()+"_"+String.valueOf(e.getSlot())));
-        economy.sellItem(player, item.getStartPrice() * getCoeficient(player, item), Material.matchMaterial(item.getId()));
-        databaseItem.addSelled(1);
-        databaseItems.put(item.getId()+"_"+String.valueOf(e.getSlot()), databaseItem);
+        DatabaseItem databaseItem = databaseItems.getOrDefault(item.getId() + "_" + e.getSlot(), new DatabaseItem(0, item.getId() + "_" + e.getSlot()));
+        if (e.isShiftClick()) {
+            if (!economy.sellStackItem(player, item.getStartPrice() * getCoefficient(player, item), Material.matchMaterial(item.getId()), item.getCoefficient(), item.getPeriod())) {
+                player.sendMessage(ChatColor.RED + "Недостаточно блоков в инвентаре");
+                return;
+            }
+            databaseItem.addSelled(64);
+        } else {
+            if (!economy.sellItem(player, item.getStartPrice() * getCoefficient(player, item), Material.matchMaterial(item.getId()))) {
+                player.sendMessage(ChatColor.RED + "Недостаточно блоков в инвентаре");
+                return;
+            }
+            databaseItem.addSelled(1);
+        }
+        databaseItems.put(item.getId() + "_" + e.getSlot(), databaseItem);
         Database.databaseItems.put(player.getName(), databaseItems);
         initializeItems(player);
     }
