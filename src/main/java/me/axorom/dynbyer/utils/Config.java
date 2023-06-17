@@ -5,17 +5,46 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Config {
     static DynByer plugin = DynByer.instance;
     private static final FileConfiguration config = DynByer.instance.getConfig();
     public static String lore;
-    public static ArrayList<Item> getItems() {
+    private int calls;
+    private List<String> periods;
+
+    public static Config configClass;
+    public Config() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (DynByer.database.reloadTime > System.currentTimeMillis()) return;
+                DynByer.database.reloadTime = System.currentTimeMillis()+(config.getInt("time")* 60000L);
+                DynByer.database.save();
+                DynByer.items = getItems();
+            }
+        }.runTaskTimer(DynByer.instance, 0, 120);
+    }
+
+    public static Config getConfigClass() {
+        return configClass;
+    }
+
+    public void reloadConfig() {
+        calls = 0;
+        ConfigurationSection section = config.getConfigurationSection("sell");
+        assert section != null;
+        periods = new ArrayList<>(section.getKeys(false));
+    }
+    public ArrayList<Item> getItems() {
         ArrayList<Item> items = new ArrayList<>();
+        String period = periods.get(calls);
         lore = config.getString("lore");
-        ConfigurationSection section = config.getConfigurationSection("sell.items");
+        ConfigurationSection section = config.getConfigurationSection("sell."+period+".items");
         Bukkit.getLogger().info("section: " + section);
         assert section != null;
         section.getKeys(false).forEach(item -> {
@@ -23,6 +52,10 @@ public class Config {
             items.add(new Item(section.getString(item + ".id"), section.getInt(item + ".startprice"), section.getDouble(item + ".coefficient"), section.getInt(item + ".period"), section.getInt(item + ".slot")));
             Bukkit.getLogger().info(items.toString());
         });
+        if (calls +1 > periods.size())
+            calls = 0;
+        else
+            calls++;
         return items;
     }
 

@@ -4,20 +4,16 @@ import me.axorom.dynbyer.DynByer;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.SerializableAs;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Database {
     YamlConfiguration db;
     public static Map<String, Map<String, DatabaseItem>> databaseItems;
     DynByer plugin = DynByer.instance;
+    long reloadTime;
 
     public Database() {
         reloadBase();
@@ -29,21 +25,21 @@ public class Database {
         db = YamlConfiguration.loadConfiguration(configFile);
         databaseItems = new HashMap<>();
         db.getKeys(false).forEach(player -> {
+            if (Objects.equals(player, "player")) return;
             ConfigurationSection section = db.getConfigurationSection(player);
             Map<String, DatabaseItem> list = new HashMap<>();
-            section.getKeys(false).forEach(item -> {
-                list.put(item, new DatabaseItem(section.getInt(item), item));
-            });
+            assert section != null;
+            section.getKeys(false).forEach(item -> list.put(item, new DatabaseItem(section.getInt(item), item)));
             databaseItems.put(player, list);
         });
+
+        reloadTime = db.getLong("reloadTime");
     }
 
     public void save() {
-        databaseItems.forEach((k, vList) -> {
-            vList.forEach((ignored, v) -> {
-                db.set(k+"."+v.getMaterial(), v.getSelled());
-            });
-        });
+        databaseItems.forEach((k, vList) -> vList.forEach((ignored, v) -> db.set(k+"."+v.getMaterial(), v.getSelled())));
+
+        db.set("reloadTime", reloadTime);
 
         try {
             db.save(new File(plugin.getDataFolder(), "db.yml"));

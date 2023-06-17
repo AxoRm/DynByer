@@ -24,6 +24,7 @@ public class SellerCommand extends AbstractCommand{
         }
         if (args[0].equalsIgnoreCase("reload")) {
             DynByer.instance.reloadConfig();
+            Config.getConfigClass().reloadConfig();
             sender.sendMessage(ChatColor.GREEN + "Конфигурация перезагружена");
             return;
         }

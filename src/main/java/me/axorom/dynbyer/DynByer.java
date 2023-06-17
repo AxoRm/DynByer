@@ -7,6 +7,7 @@ import me.axorom.dynbyer.utils.Database;
 import me.axorom.dynbyer.utils.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,8 @@ public final class DynByer extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         instance = this;
-        items = Config.getItems();
+        Config config = new Config();
+        items = config.getItems();
         new SellerCommand();
         database = new Database();
         economyUtils = new EconomyUtils();
