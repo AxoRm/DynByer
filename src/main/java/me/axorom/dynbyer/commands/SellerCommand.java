@@ -4,16 +4,12 @@ import com.google.common.collect.Lists;
 import me.axorom.dynbyer.DynByer;
 import me.axorom.dynbyer.gui.Gui;
 import me.axorom.dynbyer.utils.Config;
-import me.axorom.dynbyer.utils.Database;
-import me.axorom.dynbyer.utils.DatabaseItem;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class SellerCommand extends AbstractCommand{
     public SellerCommand() {
@@ -33,8 +29,8 @@ public class SellerCommand extends AbstractCommand{
         }
         if (args[0].equalsIgnoreCase("menu")) {
             Gui gui = new Gui(Config.getRows(),Config.getTitle(), DynByer.items, (Player) sender);
+            Bukkit.getLogger().info("Code here displaying gui");
             gui.displayInventory((Player) sender);
-            return;
         }
     }
 

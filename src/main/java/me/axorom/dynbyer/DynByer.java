@@ -17,6 +17,7 @@ public final class DynByer extends JavaPlugin {
     public static ArrayList<Item> items;
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         instance = this;
         items = Config.getItems();
         new SellerCommand();

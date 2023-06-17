@@ -24,14 +24,26 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.*;
 
 public class Gui implements Listener {
+    private final int size;
     private final Inventory inventory;
     private final EconomyUtils economy = DynByer.economyUtils;
     ArrayList<Item> items;
     public Gui(int size, String title, ArrayList<Item> items, Player player) {
+        this.size = size;
         inventory = Bukkit.createInventory(null, size * 9, title);
         this.items = items;
+        Bukkit.getLogger().info("code in constructor GUI" + " " + items);
         initializeItems(player);
+        initializeFont(Config.getFont());
         Bukkit.getPluginManager().registerEvents(this, DynByer.instance);
+    }
+
+    private void initializeFont(String font) {
+        for (int i = 0; i < size*9; i++) {
+            if (inventory.getItem(i) == null || inventory.getItem(i).equals(Material.AIR)) {
+                inventory.setItem(i, new ItemStack(Objects.requireNonNull(Material.matchMaterial(font)), 1));
+            }
+        }
     }
 
     public Map<String, Integer> getCoefficients(Player player) {
