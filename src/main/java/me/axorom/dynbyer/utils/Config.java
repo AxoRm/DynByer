@@ -1,6 +1,8 @@
 package me.axorom.dynbyer.utils;
 
 import me.axorom.dynbyer.DynByer;
+import me.axorom.dynbyer.inventory.FontItem;
+import me.axorom.dynbyer.inventory.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -8,10 +10,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Config {
-    static DynByer plugin = DynByer.instance;
+    private static ArrayList<FontItem> fontitems;
     private static final FileConfiguration config = DynByer.instance.getConfig();
     public static String lore;
     private int calls;
@@ -19,6 +22,7 @@ public class Config {
 
     public static Config configClass;
     public Config() {
+        getFontItems();
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -27,7 +31,7 @@ public class Config {
                 DynByer.database.save();
                 DynByer.items = getItems();
             }
-        }.runTaskTimer(DynByer.instance, 0, 120);
+        }.runTaskTimer(DynByer.instance, 0, 1200);
     }
 
     public static Config getConfigClass() {
@@ -59,11 +63,19 @@ public class Config {
         return items;
     }
 
+    public static ArrayList<FontItem> getFontitems() {
+        return fontitems;
+    }
+
+    public void getFontItems() {
+        fontitems = new ArrayList<>();
+        ConfigurationSection section = config.getConfigurationSection("constantmenu");
+        assert section != null;
+        section.getKeys(false).forEach(fontitem -> fontitems.add(new FontItem(section.getString(fontitem + ".id"), section.getString(fontitem + ".name"), section.getString(fontitem + ".lore"), section.getIntegerList(fontitem + ".slots"))));
+    }
+
     public static int getRows() {
         return config.getInt("rows");
-    }
-    public static String getFont() {
-        return config.getString("empty");
     }
 
     public static String getTitle(){
@@ -75,5 +87,13 @@ public class Config {
             join = join.replaceAll("\\{"+i+"}", s[i]);
         }
         return ChatColor.translateAlternateColorCodes('&', join);
+    }
+
+    public static List<String> formatForList(String s) {
+        s = ChatColor.translateAlternateColorCodes('&', s);
+        return Arrays.asList(s.split("\n"));
+    }
+    public static String formatForString(String s) {
+        return ChatColor.translateAlternateColorCodes('&', s);
     }
 }

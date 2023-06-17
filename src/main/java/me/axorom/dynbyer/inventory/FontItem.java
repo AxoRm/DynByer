@@ -1,14 +1,14 @@
 package me.axorom.dynbyer.inventory;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class FontItem {
-    private String material;
-    private String name;
-    private String lore;
-    private ArrayList<Integer> slots;
+    private final String material;
+    private final String name;
+    private final String lore;
+    private final List<Integer> slots;
 
-    public FontItem(String material, String name, String lore, ArrayList<Integer> slots) {
+    public FontItem(String material, String name, String lore, List<Integer> slots) {
         this.material = material;
         this.name = name;
         this.lore = lore;
@@ -27,7 +27,7 @@ public class FontItem {
         return lore;
     }
 
-    public ArrayList<Integer> getSlots() {
+    public List<Integer> getSlots() {
         return slots;
     }
 }

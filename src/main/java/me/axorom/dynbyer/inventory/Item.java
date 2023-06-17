@@ -1,9 +1,4 @@
-package me.axorom.dynbyer.utils;
-
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-
-import java.util.HashMap;
-import java.util.Map;
+package me.axorom.dynbyer.inventory;
 
 public class Item {
     private final String id;

@@ -2,10 +2,11 @@ package me.axorom.dynbyer.gui;
 
 import me.axorom.dynbyer.DynByer;
 import me.axorom.dynbyer.economy.EconomyUtils;
+import me.axorom.dynbyer.inventory.FontItem;
 import me.axorom.dynbyer.utils.Config;
 import me.axorom.dynbyer.utils.Database;
 import me.axorom.dynbyer.utils.DatabaseItem;
-import me.axorom.dynbyer.utils.Item;
+import me.axorom.dynbyer.inventory.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -34,14 +35,17 @@ public class Gui implements Listener {
         this.items = items;
         Bukkit.getLogger().info("code in constructor GUI" + " " + items);
         initializeItems(player);
-        initializeFont(Config.getFont());
+        initializeFont(Config.getFontitems());
         Bukkit.getPluginManager().registerEvents(this, DynByer.instance);
     }
 
-    private void initializeFont(String font) {
-        for (int i = 0; i < size*9; i++) {
-            if (inventory.getItem(i) == null || inventory.getItem(i).equals(Material.AIR)) {
-                inventory.setItem(i, new ItemStack(Objects.requireNonNull(Material.matchMaterial(font)), 1));
+    private void initializeFont(ArrayList<FontItem> items) {
+        for (FontItem item : items) {
+            String lore = item.getLore();
+            String name = item.getName();
+            String material = item.getMaterial();
+            for (int slot : item.getSlots()) {
+                inventory.setItem(slot, createSimpleGuiIem(material, name, lore));
             }
         }
     }
@@ -68,14 +72,30 @@ public class Gui implements Listener {
         if (material == null) {
             Bukkit.getLogger().info(ChatColor.RED + "Material <" + materialText + "> invalid, please correct the config!");
             DynByer.instance.getServer().getPluginManager().disablePlugin(DynByer.instance);
+            return null;
         }
-        final ItemStack item = new ItemStack(Objects.requireNonNull(Material.matchMaterial(materialText)), 1);
+        final ItemStack item = new ItemStack(material, 1);
         final ItemMeta meta = item.getItemMeta();
         assert meta != null;
         PersistentDataContainer container =  meta.getPersistentDataContainer();
         container.set(new NamespacedKey(DynByer.instance, "price"), PersistentDataType.DOUBLE, coefficient*price);
         meta.setLore(Arrays.asList(Config.format(Config.lore, String.valueOf(coefficient*price))));
         item.setItemMeta(meta);
+        return item;
+    }
+
+    protected ItemStack createSimpleGuiIem(String materialText, String name, String lore) {
+        Material material = Material.matchMaterial(materialText);
+        if (material == null) {
+            Bukkit.getLogger().info(ChatColor.RED + "Material <" + materialText + "> invalid, please correct the config!");
+            DynByer.instance.getServer().getPluginManager().disablePlugin(DynByer.instance);
+            return null;
+        }
+        final ItemStack item = new ItemStack(material, 1);
+        final ItemMeta meta = item.getItemMeta();
+        assert meta != null;
+        meta.setLore(Config.formatForList(lore));
+        meta.setDisplayName(Config.formatForString(name));
         return item;
     }
 

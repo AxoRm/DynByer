@@ -4,10 +4,9 @@ import me.axorom.dynbyer.commands.SellerCommand;
 import me.axorom.dynbyer.economy.EconomyUtils;
 import me.axorom.dynbyer.utils.Config;
 import me.axorom.dynbyer.utils.Database;
-import me.axorom.dynbyer.utils.Item;
+import me.axorom.dynbyer.inventory.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 
