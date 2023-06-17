@@ -23,6 +23,9 @@ public class Config {
     public static Config configClass;
     public Config() {
         getFontItems();
+        ConfigurationSection section = config.getConfigurationSection("sell");
+        assert section != null;
+        periods = new ArrayList<>(section.getKeys(false));
         new BukkitRunnable() {
             @Override
             public void run() {
