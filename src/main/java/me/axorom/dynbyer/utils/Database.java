@@ -26,14 +26,18 @@ public class Database {
         databaseItems = new HashMap<>();
         db.getKeys(false).forEach(player -> {
             if (Objects.equals(player, "player")) return;
-            ConfigurationSection section = db.getConfigurationSection(player);
-            Map<String, DatabaseItem> list = new HashMap<>();
-            assert section != null;
-            section.getKeys(false).forEach(item -> list.put(item, new DatabaseItem(section.getInt(item), item)));
-            databaseItems.put(player, list);
+            if (db.getConfigurationSection(player) != null) {
+                ConfigurationSection section = db.getConfigurationSection(player);
+                Map<String, DatabaseItem> list = new HashMap<>();
+                assert section != null;
+                section.getKeys(false).forEach(item -> list.put(item, new DatabaseItem(section.getInt(item), item)));
+                databaseItems.put(player, list);
+            }
         });
-
         reloadTime = db.getLong("reloadTime");
+        if (reloadTime == 0) {
+            reloadTime = System.currentTimeMillis();
+        }
     }
 
     public void save() {

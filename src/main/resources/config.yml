@@ -1,13 +1,14 @@
 rows: 5
-title: '&8Скупщик'
-lore: '&9Цены: \n &f Цена единицы: {0}\n Цена 1 стака: {1}\n&9Действия:\n &9ЛКМ &f- продать 1 предмет\n &9ШИФТ+ЛКМ &f- продать 1 стак'
-time: 1440 #в минутах
+title: "&9&lСкупщик"
+lore: "&9Цены: \n &f Цена единицы: {0}\n Цена 1 стака: {1}\n&9Действия:\n &9ЛКМ &f- продать 1 предмет\n &9ШИФТ+ЛКМ &f- продать 1 стак"
+time: 1 #в минутах
 constantmenu:
   blue:
     id: blue_stained_glass_pane
-    name: ''
-    lore: ''
+    name: ""
+    lore: ""
     slots:
+      - 0
       - 1
       - 2
       - 3
@@ -27,13 +28,13 @@ constantmenu:
       - 35
   Gray:
     id: gray_stained_glass_pane
-    name: ''
-    lore: ''
+    name: ""
+    lore: ""
     slots:
       - 9
-      - 8
-      - 10
       - 17
+      - 18
+      - 26
       - 36
       - 37
       - 38
@@ -42,16 +43,21 @@ constantmenu:
       - 44
   sellall:
     id: chest
-    name: '&l&8Продать все'
-    lore: 'Продайте все здесь'
+    name: "&9&lПродать все"
+    lore: "Продайте все здесь"
     slots:
       - 39
   info:
     id: compass
-    name: '&8Информация'
-    lore: '&8Продавайте и покупайте предметы используя скупщика'
+    name: "&9Информация"
+    lore: "&9Продавайте и покупайте предметы используя скупщика"
     slots:
       - 41
+#  timer:
+#    name: "&8Сброс"
+#    lore: "&8 До обновления магазина осталось: {0}"
+#    slots:
+#      - 40
 sell:
   period1:
     items:
@@ -60,25 +66,7 @@ sell:
         startprice: 200
         coefficient: 0.98
         period: 5
-        slot: 0
-      item1:
-        id: diamond_chestplate
-        startprice: 100
-        coefficient: 0.95
-        period: 20
-        slot: 1
-      item2:
-        id: apple
-        startprice: 100
-        coefficient: 0.90
-        period: 10
-        slot: 2
-      item3:
-        id: stone
-        startprice: 500
-        coefficient: 0.75
-        period: 15
-        slot: 3
+        slot: 10
   period2:
     items:
       item0:
@@ -86,25 +74,13 @@ sell:
         startprice: 200
         coefficient: 0.98
         period: 5
-        slot: 0
+        slot: 10
       item1:
         id: diamond_chestplate
         startprice: 100
         coefficient: 0.95
         period: 20
-        slot: 1
-      item2:
-        id: cobblestone
-        startprice: 100
-        coefficient: 0.90
-        period: 10
-        slot: 2
-      item3:
-        id: stone
-        startprice: 500
-        coefficient: 0.75
-        period: 15
-        slot: 3
+        slot: 11
   period3:
     items:
       item0:
@@ -112,22 +88,22 @@ sell:
         startprice: 200
         coefficient: 0.98
         period: 5
-        slot: 0
+        slot: 10
       item1:
         id: apple
         startprice: 100
         coefficient: 0.95
         period: 20
-        slot: 1
+        slot: 11
       item2:
         id: diamond_chestplate
         startprice: 100
         coefficient: 0.90
         period: 10
-        slot: 2
+        slot: 12
       item3:
         id: stone
         startprice: 500
         coefficient: 0.75
         period: 15
-        slot: 3
+        slot: 13

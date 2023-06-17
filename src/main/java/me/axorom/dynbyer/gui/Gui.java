@@ -25,15 +25,16 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.*;
 
 public class Gui implements Listener {
+    private final List<Material> fontMaterials = new ArrayList<>();
     private final int size;
     private final Inventory inventory;
     private final EconomyUtils economy = DynByer.economyUtils;
+    private final ArrayList<Integer> slots = new ArrayList<>();
     ArrayList<Item> items;
     public Gui(int size, String title, ArrayList<Item> items, Player player) {
         this.size = size;
-        inventory = Bukkit.createInventory(null, size * 9, title);
+        inventory = Bukkit.createInventory(null, size * 9, Config.formatForString(title));
         this.items = items;
-        Bukkit.getLogger().info("code in constructor GUI" + " " + items);
         initializeItems(player);
         initializeFont(Config.getFontitems());
         Bukkit.getPluginManager().registerEvents(this, DynByer.instance);
@@ -41,8 +42,8 @@ public class Gui implements Listener {
 
     private void initializeFont(ArrayList<FontItem> items) {
         for (FontItem item : items) {
-            String lore = item.getLore();
-            String name = item.getName();
+            String lore = item.getLore() + " ";
+            String name = item.getName() + " ";
             String material = item.getMaterial();
             for (int slot : item.getSlots()) {
                 inventory.setItem(slot, createSimpleGuiIem(material, name, lore));
@@ -62,10 +63,16 @@ public class Gui implements Listener {
     }
 
     public void initializeItems(Player player) {
+        items = DynByer.items;
+        for (int slot : slots) {
+            inventory.setItem(slot, null);
+        }
         for (Item item : items) {
             inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), getCoefficient(player, item)));
+            slots.add(item.getSlot());
         }
     }
+
 
     protected ItemStack createGuiItem(String materialText, int price, double coefficient) {
         Material material = Material.matchMaterial(materialText);
@@ -79,13 +86,14 @@ public class Gui implements Listener {
         assert meta != null;
         PersistentDataContainer container =  meta.getPersistentDataContainer();
         container.set(new NamespacedKey(DynByer.instance, "price"), PersistentDataType.DOUBLE, coefficient*price);
-        meta.setLore(Arrays.asList(Config.format(Config.lore, String.valueOf(coefficient*price))));
+        meta.setLore(Config.format(Config.lore, String.valueOf(coefficient*price), String.valueOf(coefficient*price*64)));
         item.setItemMeta(meta);
         return item;
     }
 
     protected ItemStack createSimpleGuiIem(String materialText, String name, String lore) {
         Material material = Material.matchMaterial(materialText);
+        fontMaterials.add(material);
         if (material == null) {
             Bukkit.getLogger().info(ChatColor.RED + "Material <" + materialText + "> invalid, please correct the config!");
             DynByer.instance.getServer().getPluginManager().disablePlugin(DynByer.instance);
@@ -96,6 +104,8 @@ public class Gui implements Listener {
         assert meta != null;
         meta.setLore(Config.formatForList(lore));
         meta.setDisplayName(Config.formatForString(name));
+        meta.setLocalizedName(Config.formatForString(name));
+        item.setItemMeta(meta);
         return item;
     }
 
@@ -106,12 +116,11 @@ public class Gui implements Listener {
     @EventHandler
     public void onInventoryClick(final InventoryClickEvent e) {
         if (!Objects.equals(e.getClickedInventory(), inventory)) return;
-
-        e.setCancelled(true);
-
-        final ItemStack clickedItem = e.getCurrentItem();
-        if (clickedItem == null || clickedItem.getType().isAir()) return;
         final Player player = (Player) e.getWhoClicked();
+        e.setCancelled(true);
+        initializeItems(player);
+        final ItemStack clickedItem = e.getCurrentItem();
+        if (clickedItem == null || clickedItem.getType().isAir() || fontMaterials.contains(clickedItem.getType())) return;
         Item item = DynByer.items.stream().filter(aitem -> aitem.getSlot() == e.getSlot()).findFirst().orElse(new Item("cobblestone",0,0,0,0));
         Map<String, DatabaseItem> databaseItems = Database.databaseItems.getOrDefault(player.getName(), new HashMap<>());
         DatabaseItem databaseItem = databaseItems.getOrDefault(item.getId() + "_" + e.getSlot(), new DatabaseItem(0, item.getId() + "_" + e.getSlot()));
@@ -130,7 +139,6 @@ public class Gui implements Listener {
         }
         databaseItems.put(item.getId() + "_" + e.getSlot(), databaseItem);
         Database.databaseItems.put(player.getName(), databaseItems);
-        initializeItems(player);
     }
     @EventHandler
     public void onInventoryClick(final InventoryDragEvent e) {

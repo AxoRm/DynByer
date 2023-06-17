@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import me.axorom.dynbyer.DynByer;
 import me.axorom.dynbyer.gui.Gui;
 import me.axorom.dynbyer.utils.Config;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -30,7 +29,6 @@ public class SellerCommand extends AbstractCommand{
         }
         if (args[0].equalsIgnoreCase("menu")) {
             Gui gui = new Gui(Config.getRows(),Config.getTitle(), DynByer.items, (Player) sender);
-            Bukkit.getLogger().info("Code here displaying gui");
             gui.displayInventory((Player) sender);
         }
     }
