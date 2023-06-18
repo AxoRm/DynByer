@@ -53,11 +53,12 @@ constantmenu:
     lore: "&9Продавайте и покупайте предметы используя скупщика"
     slots:
       - 41
-#  timer:
-#    name: "&8Сброс"
-#    lore: "&8 До обновления магазина осталось: {0}"
-#    slots:
-#      - 40
+  timer:
+    id: clock
+    name: "&8Сброс"
+    lore: "&8 До обновления магазина осталось: {0}"
+    slots:
+      - 40
 sell:
   period1:
     items:
@@ -77,7 +78,7 @@ sell:
         slot: 10
       item1:
         id: diamond_chestplate
-        startprice: 100
+        startprice  : 100
         coefficient: 0.95
         period: 20
         slot: 11

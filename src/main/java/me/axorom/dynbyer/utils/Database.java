@@ -13,7 +13,9 @@ public class Database {
     YamlConfiguration db;
     public static Map<String, Map<String, DatabaseItem>> databaseItems;
     DynByer plugin = DynByer.instance;
-    long reloadTime;
+    public long reloadTime;
+
+    public int calls;
 
     public Database() {
         reloadBase();
@@ -35,6 +37,7 @@ public class Database {
             }
         });
         reloadTime = db.getLong("reloadTime");
+        calls = db.getInt("calls");
         if (reloadTime == 0) {
             reloadTime = System.currentTimeMillis();
         }
@@ -44,6 +47,7 @@ public class Database {
         databaseItems.forEach((k, vList) -> vList.forEach((ignored, v) -> db.set(k+"."+v.getMaterial(), v.getSelled())));
 
         db.set("reloadTime", reloadTime);
+        db.set("calls", calls);
 
         try {
             db.save(new File(plugin.getDataFolder(), "db.yml"));

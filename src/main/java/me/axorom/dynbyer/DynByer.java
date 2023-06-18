@@ -19,10 +19,10 @@ public final class DynByer extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         instance = this;
+        database = new Database();
         Config config = new Config();
         items = config.getItems();
         new SellerCommand();
-        database = new Database();
         economyUtils = new EconomyUtils();
         Bukkit.getLogger().info("DynBuyer is enabled");
     }

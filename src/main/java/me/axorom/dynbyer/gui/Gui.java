@@ -3,10 +3,11 @@ package me.axorom.dynbyer.gui;
 import me.axorom.dynbyer.DynByer;
 import me.axorom.dynbyer.economy.EconomyUtils;
 import me.axorom.dynbyer.inventory.FontItem;
+import me.axorom.dynbyer.inventory.Item;
 import me.axorom.dynbyer.utils.Config;
 import me.axorom.dynbyer.utils.Database;
 import me.axorom.dynbyer.utils.DatabaseItem;
-import me.axorom.dynbyer.inventory.Item;
+import me.axorom.dynbyer.utils.TimeTranslation;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -21,12 +22,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.*;
 
 public class Gui implements Listener {
     private final List<Material> fontMaterials = new ArrayList<>();
     private final int size;
+    public static boolean refresh = false;
     private final Inventory inventory;
     private final EconomyUtils economy = DynByer.economyUtils;
     private final ArrayList<Integer> slots = new ArrayList<>();
@@ -36,19 +39,47 @@ public class Gui implements Listener {
         inventory = Bukkit.createInventory(null, size * 9, Config.formatForString(title));
         this.items = items;
         initializeItems(player);
-        initializeFont(Config.getFontitems());
+        initializeFont(Config.getFontitems(), player);
         Bukkit.getPluginManager().registerEvents(this, DynByer.instance);
     }
 
-    private void initializeFont(ArrayList<FontItem> items) {
+    private void initializeFont(ArrayList<FontItem> items, Player player) {
         for (FontItem item : items) {
             String lore = item.getLore() + " ";
             String name = item.getName() + " ";
             String material = item.getMaterial();
+            if (lore.contains("{0}")) {
+                for (int slot : item.getSlots()) {
+                    ItemStack itemStack = createSimpleGuiIem(material, name, lore);
+                    inventory.setItem(slot, itemStack);
+                    ItemMeta meta = itemStack.getItemMeta();
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            assert meta != null;
+                            if (refresh) {
+                                initializeItems(player);
+                                refresh = false;
+                            }
+                            meta.setLore(Config.format(lore, TimeTranslation.getDurationBreakdown(getRemainedTime())));
+                            itemStack.setItemMeta(meta);
+                            inventory.setItem(slot, itemStack);
+                        }
+                    }.runTaskTimer(DynByer.instance, 0, 20);
+                }
+                return;
+            }
             for (int slot : item.getSlots()) {
                 inventory.setItem(slot, createSimpleGuiIem(material, name, lore));
             }
         }
+    }
+
+    private int getRemainedTime() {
+        int remained = (int) ((DynByer.database.reloadTime - System.currentTimeMillis()));
+        int time = ((Math.abs(remained) + remained)/2);
+        System.out.println("Remaining time: " + time);
+        return time;
     }
 
     public Map<String, Integer> getCoefficients(Player player) {
@@ -102,9 +133,9 @@ public class Gui implements Listener {
         final ItemStack item = new ItemStack(material, 1);
         final ItemMeta meta = item.getItemMeta();
         assert meta != null;
-        meta.setLore(Config.formatForList(lore));
         meta.setDisplayName(Config.formatForString(name));
         meta.setLocalizedName(Config.formatForString(name));
+        meta.setLore(Config.format(lore, TimeTranslation.getDurationBreakdown(getRemainedTime())));
         item.setItemMeta(meta);
         return item;
     }

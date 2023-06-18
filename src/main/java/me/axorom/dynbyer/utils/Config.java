@@ -1,6 +1,7 @@
 package me.axorom.dynbyer.utils;
 
 import me.axorom.dynbyer.DynByer;
+import me.axorom.dynbyer.gui.Gui;
 import me.axorom.dynbyer.inventory.FontItem;
 import me.axorom.dynbyer.inventory.Item;
 import org.bukkit.ChatColor;
@@ -16,7 +17,6 @@ public class Config {
     private static ArrayList<FontItem> fontitems;
     private static final FileConfiguration config = DynByer.instance.getConfig();
     public static String lore;
-    private int calls;
     private List<String> periods;
 
     public static Config configClass;
@@ -29,36 +29,38 @@ public class Config {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (DynByer.database.reloadTime - 500L > System.currentTimeMillis()) return;
+                System.out.println("CHECKING" + DynByer.database.calls);
+                if (DynByer.database.reloadTime - 3000L > System.currentTimeMillis()) return;
+                System.out.println("REFRESHING");
+                Gui.refresh = true;
                 DynByer.database.reloadTime = System.currentTimeMillis()+(config.getInt("time")* 60000L);
                 DynByer.database.save();
                 DynByer.items = getItems();
-                if (calls + 1 == periods.size())
-                    calls = 0;
+                if (DynByer.database.calls + 1 == periods.size())
+                    DynByer.database.calls = 0;
                 else
-                    calls++;
+                    DynByer.database.calls++;
             }
-        }.runTaskTimer(DynByer.instance, 0, 1200);
+        }.runTaskTimer(DynByer.instance, 0, 60);
     }
     public static Config getConfigClass() {
         return configClass;
     }
 
     public void reloadConfig() {
-        calls = 0;
+        DynByer.database.calls = 0;
         ConfigurationSection section = config.getConfigurationSection("sell");
         assert section != null;
         periods = new ArrayList<>(section.getKeys(false));
     }
     public ArrayList<Item> getItems() {
         ArrayList<Item> items = new ArrayList<>();
-        String period = periods.get(calls);
+        String period = periods.get(DynByer.database.calls);
         lore = config.getString("lore");
         ConfigurationSection section = config.getConfigurationSection("sell."+period+".items");
         assert section != null;
-        section.getKeys(false).forEach(item -> {
-            items.add(new Item(section.getString(item + ".id"), section.getInt(item + ".startprice"), section.getDouble(item + ".coefficient"), section.getInt(item + ".period"), section.getInt(item + ".slot")));
-        });
+        section.getKeys(false).forEach(item -> items.add(new Item(section.getString(item + ".id"), section.getInt(item + ".startprice"),
+                section.getDouble(item + ".coefficient"), section.getInt(item + ".period"), section.getInt(item + ".slot"))));
         return items;
     }
 
