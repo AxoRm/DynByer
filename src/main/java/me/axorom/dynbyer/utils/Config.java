@@ -30,9 +30,10 @@ public class Config {
             @Override
             public void run() {
                 if (DynByer.database.frequency - 1000L <= System.currentTimeMillis()) {
-                    DynByer.database.frequency = System.currentTimeMillis()+(config.getInt("time")* 60000L);
-                    DynByer.database.save();
-
+                    DynByer.database.frequency = System.currentTimeMillis()+(config.getInt("frequency")* 60000L);
+                    DynByer.database.resetBase();
+                    DynByer.items = getItems();
+                    Gui.refresh = true;
                 }
                 if (DynByer.database.reloadTime - 1000L > System.currentTimeMillis()) return;
                 DynByer.database.reloadTime = System.currentTimeMillis()+(config.getInt("time")* 60000L);

@@ -46,6 +46,10 @@ public class Database {
         }
     }
 
+    public void resetBase() {
+        databaseItems = new HashMap<>();
+        save();
+    }
     public void save() {
         databaseItems.forEach((k, vList) -> vList.forEach((ignored, v) -> db.set(k+"."+v.getMaterial(), v.getSelled())));
 

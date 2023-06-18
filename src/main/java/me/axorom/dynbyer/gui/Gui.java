@@ -134,7 +134,7 @@ public class Gui implements Listener {
         assert meta != null;
         PersistentDataContainer container =  meta.getPersistentDataContainer();
         container.set(new NamespacedKey(DynByer.instance, "price"), PersistentDataType.DOUBLE, coefficient*price);
-        meta.setLore(Config.format(Config.lore, String.valueOf(String.format("%,.2f", coefficient*price)), String.valueOf(String.format("%,.2f",coefficient*price*64))));
+        meta.setLore(Config.format(Config.lore, String.valueOf(String.format(Locale.US, "%,.2f", coefficient*price)), String.valueOf( String.format(Locale.US,"%,.2f",coefficient*price*64))));
         item.setItemMeta(meta);
         return item;
     }
