@@ -2,9 +2,10 @@ package me.axorom.dynbyer;
 
 import me.axorom.dynbyer.commands.SellerCommand;
 import me.axorom.dynbyer.economy.EconomyUtils;
+import me.axorom.dynbyer.inventory.Item;
 import me.axorom.dynbyer.utils.Config;
 import me.axorom.dynbyer.utils.Database;
-import me.axorom.dynbyer.inventory.Item;
+import me.axorom.dynbyer.utils.MessagesParser;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -15,21 +16,23 @@ public final class DynByer extends JavaPlugin {
     public static DynByer instance;
     public static EconomyUtils economyUtils;
     public static ArrayList<Item> items;
+    public static MessagesParser messages;
     @Override
     public void onEnable() {
         saveDefaultConfig();
         instance = this;
-        database = new Database();
+        messages = new MessagesParser(this);
         Config config = new Config();
+        database = new Database();
         items = config.getItems();
         new SellerCommand();
         economyUtils = new EconomyUtils();
-        Bukkit.getLogger().info("DynBuyer is enabled");
+        Bukkit.getLogger().info(messages.getString("startup"));
     }
 
     @Override
     public void onDisable() {
         database.save();
-        Bukkit.getLogger().info("DynBuyer is disabled");
+        Bukkit.getLogger().info(messages.getString("end"));
     }
 }

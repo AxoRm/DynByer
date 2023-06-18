@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import me.axorom.dynbyer.DynByer;
 import me.axorom.dynbyer.gui.Gui;
 import me.axorom.dynbyer.utils.Config;
-import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -18,13 +17,13 @@ public class SellerCommand extends AbstractCommand{
     @Override
     public void execute(CommandSender sender, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.RED + "Неполная команда");
+            sender.sendMessage(DynByer.messages.getString("incompleteСommand"));
             return;
         }
         if (args[0].equalsIgnoreCase("reload")) {
             DynByer.instance.reloadConfig();
             Config.getConfigClass().reloadConfig();
-            sender.sendMessage(ChatColor.GREEN + "Конфигурация перезагружена");
+            sender.sendMessage(DynByer.messages.getString("reload"));
             return;
         }
         if (args[0].equalsIgnoreCase("menu")) {

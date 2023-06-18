@@ -17,6 +17,8 @@ public class Database {
 
     public int calls;
 
+    public long frequency;
+
     public Database() {
         reloadBase();
     }
@@ -38,6 +40,7 @@ public class Database {
         });
         reloadTime = db.getLong("reloadTime");
         calls = db.getInt("calls");
+        frequency = db.getInt("frequency");
         if (reloadTime == 0) {
             reloadTime = System.currentTimeMillis();
         }
@@ -48,6 +51,7 @@ public class Database {
 
         db.set("reloadTime", reloadTime);
         db.set("calls", calls);
+        db.set("frequency", frequency);
 
         try {
             db.save(new File(plugin.getDataFolder(), "db.yml"));

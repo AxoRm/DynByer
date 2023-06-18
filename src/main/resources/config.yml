@@ -1,7 +1,9 @@
 rows: 5
 title: "&9&lСкупщик"
 lore: "&9Цены: \n &f Цена единицы: {0}\n Цена 1 стака: {1}\n&9Действия:\n &9ЛКМ &f- продать 1 предмет\n &9ШИФТ+ЛКМ &f- продать 1 стак"
-time: 1 #в минутах
+time: 1 # в минутах - частота изменения магазина
+frequency: 1 # в минутах - частота сброса цены игркоам(очистка BAZы)
+
 constantmenu:
   blue:
     id: blue_stained_glass_pane
@@ -12,7 +14,6 @@ constantmenu:
       - 1
       - 2
       - 3
-      - 4
       - 5
       - 6
       - 7
@@ -59,6 +60,12 @@ constantmenu:
     lore: "&8 До обновления магазина осталось: {0}"
     slots:
       - 40
+  balance:
+    id: gold_ingot
+    name: "&eБаланс"
+    lore: "&eВаш текущий баланс: %vault_eco_balance%"
+    slots:
+      - 4
 sell:
   period1:
     items:

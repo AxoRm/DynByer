@@ -3,7 +3,6 @@ package me.axorom.dynbyer.economy;
 import me.axorom.dynbyer.DynByer;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -11,7 +10,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 public class EconomyUtils {
     private Economy economy;
@@ -24,14 +22,13 @@ public class EconomyUtils {
     public EconomyUtils() {
         boolean check = setupEconomy();
         if (check)
-            Bukkit.getLogger().info(ChatColor.GREEN + "Economy linked with DynBuyer plugin");
+            Bukkit.getLogger().info(DynByer.messages.getString("economyTrue"));
         else
-            Bukkit.getLogger().info(ChatColor.RED + "Economy not linked with DynBuyer plugin");
+            Bukkit.getLogger().info(DynByer.messages.getString("economyFalse"));
     }
     private boolean setupEconomy() {
         RegisteredServiceProvider<Economy> rsp = plugin.getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null) {
-            plugin.getLogger().log(Level.SEVERE, "NO RSP");
             return false;
         }
         economy = rsp.getProvider();
@@ -55,6 +52,7 @@ public class EconomyUtils {
                 continue;
             item.setAmount(item.getAmount() - 1);
             economy.depositPlayer(player, price);
+            player.sendMessage(DynByer.messages.formatPlaceholder(player, DynByer.messages.getString("gain"), String.format("%,.2f", price), "1"));
             return true;
         }
         return false;
@@ -90,6 +88,7 @@ public class EconomyUtils {
     }
 
     public void pay(ArrayList<Integer> indexes, int size, Inventory playerInventory, Player player, double price, double coefficient, int period) {
+        int sizetemp = size;
         for (int i : indexes) {
             ItemStack item = playerInventory.getItem(i);
             if (item == null)
@@ -107,5 +106,6 @@ public class EconomyUtils {
                 economy.depositPlayer(player, (price * (1 - Math.pow(coefficient, size / period))) / (1 - coefficient));
             }
         }
+        player.sendMessage(DynByer.messages.formatPlaceholder(player, DynByer.messages.getString("gain"), String.format("%,.2f", (price * (1 - Math.pow(coefficient, size / period))) / (1 - coefficient)), String.valueOf(sizetemp)));
     }
 }

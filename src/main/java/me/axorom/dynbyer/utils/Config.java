@@ -29,19 +29,22 @@ public class Config {
         new BukkitRunnable() {
             @Override
             public void run() {
-                System.out.println("CHECKING" + DynByer.database.calls);
-                if (DynByer.database.reloadTime - 3000L > System.currentTimeMillis()) return;
-                System.out.println("REFRESHING");
-                Gui.refresh = true;
+                if (DynByer.database.frequency - 1000L <= System.currentTimeMillis()) {
+                    DynByer.database.frequency = System.currentTimeMillis()+(config.getInt("time")* 60000L);
+                    DynByer.database.save();
+
+                }
+                if (DynByer.database.reloadTime - 1000L > System.currentTimeMillis()) return;
                 DynByer.database.reloadTime = System.currentTimeMillis()+(config.getInt("time")* 60000L);
                 DynByer.database.save();
-                DynByer.items = getItems();
                 if (DynByer.database.calls + 1 == periods.size())
                     DynByer.database.calls = 0;
                 else
                     DynByer.database.calls++;
+                DynByer.items = getItems();
+                Gui.refresh = true;
             }
-        }.runTaskTimer(DynByer.instance, 0, 60);
+        }.runTaskTimer(DynByer.instance, 0, 1200);
     }
     public static Config getConfigClass() {
         return configClass;
@@ -73,6 +76,9 @@ public class Config {
         ConfigurationSection section = config.getConfigurationSection("constantmenu");
         assert section != null;
         section.getKeys(false).forEach(fontitem -> fontitems.add(new FontItem(section.getString(fontitem + ".id"), section.getString(fontitem + ".name"), section.getString(fontitem + ".lore"), section.getIntegerList(fontitem + ".slots"))));
+        for (FontItem item : fontitems) {
+            System.out.println(item.getName());
+        }
     }
 
     public static int getRows() {

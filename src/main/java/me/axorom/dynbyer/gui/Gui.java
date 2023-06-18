@@ -8,8 +8,8 @@ import me.axorom.dynbyer.utils.Config;
 import me.axorom.dynbyer.utils.Database;
 import me.axorom.dynbyer.utils.DatabaseItem;
 import me.axorom.dynbyer.utils.TimeTranslation;
+import me.clip.placeholderapi.PlaceholderAPI;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -30,6 +30,7 @@ public class Gui implements Listener {
     private final List<Material> fontMaterials = new ArrayList<>();
     private final int size;
     public static boolean refresh = false;
+    private final List<FontItem> updateItems = new ArrayList<>();
     private final Inventory inventory;
     private final EconomyUtils economy = DynByer.economyUtils;
     private final ArrayList<Integer> slots = new ArrayList<>();
@@ -44,7 +45,7 @@ public class Gui implements Listener {
     }
 
     private void initializeFont(ArrayList<FontItem> items, Player player) {
-        for (FontItem item : items) {
+        for(FontItem item : items) {
             String lore = item.getLore() + " ";
             String name = item.getName() + " ";
             String material = item.getMaterial();
@@ -61,13 +62,19 @@ public class Gui implements Listener {
                                 initializeItems(player);
                                 refresh = false;
                             }
+
                             meta.setLore(Config.format(lore, TimeTranslation.getDurationBreakdown(getRemainedTime())));
                             itemStack.setItemMeta(meta);
                             inventory.setItem(slot, itemStack);
                         }
                     }.runTaskTimer(DynByer.instance, 0, 20);
                 }
-                return;
+                continue;
+            }
+            if ((lore.length() - lore.replace("%", "").length()) % 2 == 0) {
+                updateItems.add(item);
+                updateUpdateItems(player);
+                continue;
             }
             for (int slot : item.getSlots()) {
                 inventory.setItem(slot, createSimpleGuiIem(material, name, lore));
@@ -75,11 +82,21 @@ public class Gui implements Listener {
         }
     }
 
+    protected void updateUpdateItems(Player player) {
+        for (FontItem item : updateItems) {
+            for (int slot : item.getSlots()) {
+                String lore = PlaceholderAPI.setPlaceholders(player, item.getLore() + " ");
+                System.out.println(lore);
+                String name = item.getName() + " ";
+                String material = item.getMaterial();
+                inventory.setItem(slot, createSimpleGuiIem(material, name, lore));
+            }
+        }
+    }
+
     private int getRemainedTime() {
         int remained = (int) ((DynByer.database.reloadTime - System.currentTimeMillis()));
-        int time = ((Math.abs(remained) + remained)/2);
-        System.out.println("Remaining time: " + time);
-        return time;
+        return ((Math.abs(remained) + remained)/2);
     }
 
     public Map<String, Integer> getCoefficients(Player player) {
@@ -108,7 +125,7 @@ public class Gui implements Listener {
     protected ItemStack createGuiItem(String materialText, int price, double coefficient) {
         Material material = Material.matchMaterial(materialText);
         if (material == null) {
-            Bukkit.getLogger().info(ChatColor.RED + "Material <" + materialText + "> invalid, please correct the config!");
+            Bukkit.getLogger().info(DynByer.messages.format(DynByer.messages.getString("invalidMaterial"), materialText));
             DynByer.instance.getServer().getPluginManager().disablePlugin(DynByer.instance);
             return null;
         }
@@ -117,7 +134,7 @@ public class Gui implements Listener {
         assert meta != null;
         PersistentDataContainer container =  meta.getPersistentDataContainer();
         container.set(new NamespacedKey(DynByer.instance, "price"), PersistentDataType.DOUBLE, coefficient*price);
-        meta.setLore(Config.format(Config.lore, String.valueOf(coefficient*price), String.valueOf(coefficient*price*64)));
+        meta.setLore(Config.format(Config.lore, String.valueOf(String.format("%,.2f", coefficient*price)), String.valueOf(String.format("%,.2f",coefficient*price*64))));
         item.setItemMeta(meta);
         return item;
     }
@@ -126,7 +143,7 @@ public class Gui implements Listener {
         Material material = Material.matchMaterial(materialText);
         fontMaterials.add(material);
         if (material == null) {
-            Bukkit.getLogger().info(ChatColor.RED + "Material <" + materialText + "> invalid, please correct the config!");
+            Bukkit.getLogger().info(DynByer.messages.format(DynByer.messages.getString("invalidMaterial"), materialText));
             DynByer.instance.getServer().getPluginManager().disablePlugin(DynByer.instance);
             return null;
         }
@@ -157,17 +174,18 @@ public class Gui implements Listener {
         DatabaseItem databaseItem = databaseItems.getOrDefault(item.getId() + "_" + e.getSlot(), new DatabaseItem(0, item.getId() + "_" + e.getSlot()));
         if (e.isShiftClick()) {
             if (!economy.sellStackItem(player, item.getStartPrice() * getCoefficient(player, item), Material.matchMaterial(item.getId()), item.getCoefficient(), item.getPeriod())) {
-                player.sendMessage(ChatColor.RED + "Недостаточно блоков в инвентаре");
+                player.sendMessage(DynByer.messages.getString("notEnoughBlocks"));
                 return;
             }
             databaseItem.addSelled(64);
         } else {
             if (!economy.sellItem(player, item.getStartPrice() * getCoefficient(player, item), Material.matchMaterial(item.getId()))) {
-                player.sendMessage(ChatColor.RED + "Недостаточно блоков в инвентаре");
+                player.sendMessage(DynByer.messages.getString("notEnoughBlocks"));
                 return;
             }
             databaseItem.addSelled(1);
         }
+        updateUpdateItems(player);
         databaseItems.put(item.getId() + "_" + e.getSlot(), databaseItem);
         Database.databaseItems.put(player.getName(), databaseItems);
     }
