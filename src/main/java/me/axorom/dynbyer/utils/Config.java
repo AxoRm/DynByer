@@ -77,9 +77,6 @@ public class Config {
         ConfigurationSection section = config.getConfigurationSection("constantmenu");
         assert section != null;
         section.getKeys(false).forEach(fontitem -> fontitems.add(new FontItem(section.getString(fontitem + ".id"), section.getString(fontitem + ".name"), section.getString(fontitem + ".lore"), section.getIntegerList(fontitem + ".slots"))));
-        for (FontItem item : fontitems) {
-            System.out.println(item.getName());
-        }
     }
 
     public static int getRows() {

@@ -86,7 +86,6 @@ public class Gui implements Listener {
         for (FontItem item : updateItems) {
             for (int slot : item.getSlots()) {
                 String lore = PlaceholderAPI.setPlaceholders(player, item.getLore() + " ");
-                System.out.println(lore);
                 String name = item.getName() + " ";
                 String material = item.getMaterial();
                 inventory.setItem(slot, createSimpleGuiIem(material, name, lore));
