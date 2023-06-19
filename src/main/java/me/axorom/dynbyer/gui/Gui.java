@@ -46,14 +46,21 @@ public class Gui implements Listener {
 
     private void initializeFont(ArrayList<FontItem> items, Player player) {
         for(FontItem item : items) {
-            String lore = item.getLore() + " ";
-            String name = item.getName() + " ";
+            String lore = item.getLore();
+            String name = item.getName();
+            if (lore == "") {
+                lore = " ";
+            }
+            if (name == "") {
+                name = " ";
+            }
             String material = item.getMaterial();
             if (lore.contains("{0}")) {
                 for (int slot : item.getSlots()) {
                     ItemStack itemStack = createSimpleGuiIem(material, name, lore);
                     inventory.setItem(slot, itemStack);
                     ItemMeta meta = itemStack.getItemMeta();
+                    String finalLore = lore;
                     new BukkitRunnable() {
                         @Override
                         public void run() {
@@ -62,8 +69,7 @@ public class Gui implements Listener {
                                 initializeItems(player);
                                 refresh = false;
                             }
-
-                            meta.setLore(Config.format(lore, TimeTranslation.getDurationBreakdown(getRemainedTime())));
+                            meta.setLore(Config.format(finalLore, TimeTranslation.getDurationBreakdown(getRemainedTime())));
                             itemStack.setItemMeta(meta);
                             inventory.setItem(slot, itemStack);
                         }
@@ -85,8 +91,13 @@ public class Gui implements Listener {
     protected void updateUpdateItems(Player player) {
         for (FontItem item : updateItems) {
             for (int slot : item.getSlots()) {
-                String lore = PlaceholderAPI.setPlaceholders(player, item.getLore() + " ");
-                String name = item.getName() + " ";
+                String lore = item.getLore();
+                if (lore.equals(""))
+                    lore = " ";
+                lore = PlaceholderAPI.setPlaceholders(player, lore);
+                String name = item.getName();
+                if (name.equals(""))
+                    name = " ";
                 String material = item.getMaterial();
                 inventory.setItem(slot, createSimpleGuiIem(material, name, lore));
             }

@@ -26,6 +26,7 @@ public class Config {
         assert section != null;
         configClass = this;
         periods = new ArrayList<>(section.getKeys(false));
+
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -52,7 +53,10 @@ public class Config {
     }
 
     public void reloadConfig() {
-        DynByer.database.calls = 0;
+        DynByer.database.reloadBase();
+        DynByer.items = getItems();
+        getFontItems();
+        DynByer.messages.reloadConfig();
         ConfigurationSection section = config.getConfigurationSection("sell");
         assert section != null;
         periods = new ArrayList<>(section.getKeys(false));
