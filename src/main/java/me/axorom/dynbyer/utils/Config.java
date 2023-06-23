@@ -4,6 +4,7 @@ import me.axorom.dynbyer.DynByer;
 import me.axorom.dynbyer.gui.Gui;
 import me.axorom.dynbyer.inventory.FontItem;
 import me.axorom.dynbyer.inventory.Item;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -67,8 +68,14 @@ public class Config {
         lore = config.getString("lore");
         ConfigurationSection section = config.getConfigurationSection("sell."+period+".items");
         assert section != null;
-        section.getKeys(false).forEach(item -> items.add(new Item(section.getString(item + ".id"), section.getInt(item + ".startprice"),
-                section.getDouble(item + ".coefficient"), section.getInt(item + ".period"), section.getInt(item + ".slot"))));
+        section.getKeys(false).forEach(item -> {
+            items.add(new Item(section.getString(item + ".id"), section.getInt(item + ".startprice"),
+                section.getDouble(item + ".coefficient"), section.getInt(item + ".period"), section.getInt(item + ".slot")));
+            if (section.getDouble(item + ".coefficient") == 1) {
+                Bukkit.getLogger().info("Please don't specify coefficient = 1");
+                DynByer.instance.getServer().getPluginManager().disablePlugin(DynByer.instance);
+            }
+        });
         return items;
     }
 

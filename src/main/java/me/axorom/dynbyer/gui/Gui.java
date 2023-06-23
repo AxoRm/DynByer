@@ -109,7 +109,7 @@ public class Gui implements Listener {
         return ((Math.abs(remained) + remained)/2);
     }
 
-    public Map<String, Integer> getCoefficients(Player player) {
+    public Map<String, Integer> getSelledCount(Player player) {
         Map<String, DatabaseItem> databaseItem = Database.databaseItems.getOrDefault(player.getName(), new HashMap<>());
         Map<String, Integer> coefficients = new HashMap<>();
         databaseItem.forEach((k, item) -> coefficients.put(item.getMaterial(), item.getSelled()));
@@ -117,7 +117,7 @@ public class Gui implements Listener {
     }
 
     public double getCoefficient(Player player, Item item) {
-        return Math.pow(item.getCoefficient(), Math.floor((double) getCoefficients(player).getOrDefault(item.getId() + "_" + item.getSlot(), 0) / item.getPeriod()));
+        return Math.pow(item.getCoefficient(), 1 + Math.floor((double) getSelledCount(player).getOrDefault(item.getId() + "_" + item.getSlot(), 0) / item.getPeriod()));
     }
 
     public void initializeItems(Player player) {
@@ -126,13 +126,13 @@ public class Gui implements Listener {
             inventory.setItem(slot, null);
         }
         for (Item item : items) {
-            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), getCoefficient(player, item)));
+            inventory.setItem(item.getSlot(), createGuiItem(item.getId(), item.getStartPrice(), getCoefficient(player, item), item.getPeriod(), item.getCoefficient()));
             slots.add(item.getSlot());
         }
     }
 
 
-    protected ItemStack createGuiItem(String materialText, int price, double coefficient) {
+    protected ItemStack createGuiItem(String materialText, int price, double coefficient, int period, double standartCoefficient) {
         Material material = Material.matchMaterial(materialText);
         if (material == null) {
             Bukkit.getLogger().info(DynByer.messages.format(DynByer.messages.getString("invalidMaterial"), materialText));
@@ -144,7 +144,7 @@ public class Gui implements Listener {
         assert meta != null;
         PersistentDataContainer container =  meta.getPersistentDataContainer();
         container.set(new NamespacedKey(DynByer.instance, "price"), PersistentDataType.DOUBLE, coefficient*price);
-        meta.setLore(Config.format(Config.lore, String.valueOf(String.format(Locale.US, "%,.2f", coefficient*price)), String.valueOf( String.format(Locale.US,"%,.2f",coefficient*price*64))));
+        meta.setLore(Config.format(Config.lore, String.valueOf(String.format(Locale.US, "%,.2f", coefficient*price)), String.valueOf( String.format(Locale.US,"%,.2f",(price * coefficient * (1 - Math.pow(standartCoefficient, 64 / period))) / (1 - standartCoefficient)))));
         item.setItemMeta(meta);
         return item;
     }
@@ -182,12 +182,13 @@ public class Gui implements Listener {
         Item item = DynByer.items.stream().filter(aitem -> aitem.getSlot() == e.getSlot()).findFirst().orElse(new Item("cobblestone",0,0,0,0));
         Map<String, DatabaseItem> databaseItems = Database.databaseItems.getOrDefault(player.getName(), new HashMap<>());
         DatabaseItem databaseItem = databaseItems.getOrDefault(item.getId() + "_" + e.getSlot(), new DatabaseItem(0, item.getId() + "_" + e.getSlot()));
+        if (!e.isLeftClick())
+            return;
         if (e.isShiftClick()) {
-            if (!economy.sellStackItem(player, item.getStartPrice() * getCoefficient(player, item), Material.matchMaterial(item.getId()), item.getCoefficient(), item.getPeriod())) {
+            if (!economy.sellStackItem(player, item.getStartPrice() * getCoefficient(player, item), Material.matchMaterial(item.getId()), item.getCoefficient(), item.getPeriod(), databaseItem)) {
                 player.sendMessage(DynByer.messages.getString("notEnoughBlocks"));
                 return;
             }
-            databaseItem.addSelled(64);
         } else {
             if (!economy.sellItem(player, item.getStartPrice() * getCoefficient(player, item), Material.matchMaterial(item.getId()))) {
                 player.sendMessage(DynByer.messages.getString("notEnoughBlocks"));
@@ -198,6 +199,7 @@ public class Gui implements Listener {
         updateUpdateItems(player);
         databaseItems.put(item.getId() + "_" + e.getSlot(), databaseItem);
         Database.databaseItems.put(player.getName(), databaseItems);
+        initializeItems(player);
     }
     @EventHandler
     public void onInventoryClick(final InventoryDragEvent e) {

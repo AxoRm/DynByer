@@ -1,6 +1,7 @@
 package me.axorom.dynbyer.economy;
 
 import me.axorom.dynbyer.DynByer;
+import me.axorom.dynbyer.utils.DatabaseItem;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -58,7 +59,7 @@ public class EconomyUtils {
         return false;
     }
 
-    public boolean sellStackItem(Player player, double price, Material material, double coefficient, int period) {
+    public boolean sellStackItem(Player player, double price, Material material, double coefficient, int period, DatabaseItem databaseItem) {
         int stack = 64;
         int halfstack = 32;
         Inventory playerInventory = player.getInventory();
@@ -77,12 +78,15 @@ public class EconomyUtils {
             return false;
         } else if (count < halfstack + 1) {
             pay(indexes, 16, playerInventory, player, price, coefficient, period);
+            databaseItem.addSelled(16);
             return true;
         } else if (count < stack + 1) {
             pay(indexes, 32, playerInventory, player, price, coefficient, period);
+            databaseItem.addSelled(32);
             return true;
         } else {
             pay(indexes, 64, playerInventory, player, price, coefficient, period);
+            databaseItem.addSelled(64);
             return true;
         }
     }
@@ -103,9 +107,11 @@ public class EconomyUtils {
             }
             playerInventory.setItem(i, item);
             if (size <= 0) {
-                economy.depositPlayer(player, (price * (1 - Math.pow(coefficient, size / period))) / (1 - coefficient));
+                break;
             }
         }
-        player.sendMessage(DynByer.messages.formatPlaceholder(player, DynByer.messages.getString("gain"), String.format("%,.2f", (price * (1 - Math.pow(coefficient, size / period))) / (1 - coefficient)), String.valueOf(sizetemp)));
+        double finalprice = (price * (1 - Math.pow(coefficient, sizetemp / period))) / (1 - coefficient);
+        economy.depositPlayer(player, finalprice);
+        player.sendMessage(DynByer.messages.formatPlaceholder(player, DynByer.messages.getString("gain"), String.format("%,.2f", finalprice), String.valueOf(sizetemp)));
     }
 }
